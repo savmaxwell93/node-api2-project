@@ -28,7 +28,21 @@ router.get('/:id', (req, res) => {
         })
 })
 router.post('/', (req, res) => {
-    console.log('add new post from posts router')
+    const body = req.body;
+    if (!body.title || !body.contents) {
+        res.status(400).json({ message: "please provide title and contents for the post"})
+    } else {
+        Post.insert(body)
+            .then(({ id }) => {
+                    return Post.findById(id)
+            })
+            .then(post => {
+                res.status(201).json(post)
+            })
+            .catch(err => {
+                res.status(500).json({ message: "There was an error while saving the post to the database"})
+            })
+    }
 })
 router.put('/:id', (req, res) => {
     console.log('edit post with id from posts router')
