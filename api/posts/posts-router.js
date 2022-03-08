@@ -1,4 +1,5 @@
 const express = require('express');
+const { response } = require('../server');
 
 const Post = require('./posts-model');
 
@@ -91,7 +92,21 @@ router.delete('/:id', async (req, res) => {
 })
 
 router.get('/:id/comments', (req, res) => {
-    console.log('get all comments from post with id from posts router')
+    const id = req.params.id;
+    Post.findById(id)
+        .then(post => {
+            if (!post) {
+                res.status(404).json({ message: "The post with the specified ID does not exist"})
+            } else {
+                Post.findPostComments(id)
+                    .then(comments => {
+                        res.status(200).json(comments)
+                    })
+            }
+        })
+        .catch(err => {
+            res.status(500).json({ message: "The comments information could not be retrieved"})
+        })
 })
 
 module.exports = router;
