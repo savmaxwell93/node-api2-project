@@ -13,6 +13,7 @@ router.get('/', (req, res) => {
             res.status(500).json({ message: "The posts information could not be retrieved"})
         })
 })
+
 router.get('/:id', (req, res) => {
     const id = req.params.id;
     Post.findById(id)
@@ -27,6 +28,7 @@ router.get('/:id', (req, res) => {
             res.status(500).json({ message: "The post information could not be retrieved"})
         })
 })
+
 router.post('/', (req, res) => {
     const body = req.body;
     if (!body.title || !body.contents) {
@@ -44,12 +46,39 @@ router.post('/', (req, res) => {
             })
     }
 })
+
 router.put('/:id', (req, res) => {
-    console.log('edit post with id from posts router')
+    const id = req.params.id;
+    const body = req.body;
+    if (!body.title || !body.contents) {
+        res.status(400).json({ message: "Please provide title and contents for the post"})
+    } else {
+        Post.findById(id)
+            .then(post => {
+                if (!post) {
+                    res.status(404).json({ message: "The post with the specified ID does not exist"})
+                } else {
+                    return Post.update(id, body)
+                }
+            })
+            .then(updatedPost => {
+                if (updatedPost) {
+                    return Post.findById(id)
+                }
+            })
+            .then(post => {
+                res.status(200).json(post)
+            })
+            .catch(err => {
+                res.status(500).json({ message: "The post information could not be modified"})
+            })
+    }
 })
+
 router.delete('/:id', (req, res) => {
     console.log('delete post with id from posts router')
 })
+
 router.get('/:id/comments', (req, res) => {
     console.log('get all comments from post with id from posts router')
 })
